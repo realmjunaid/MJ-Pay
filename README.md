@@ -86,8 +86,14 @@ Outputs:
 
 ## Install
 
+Download the signed release APK from the repo:
+
+- [releases/MJ-Pay-1.0.0.apk](releases/MJ-Pay-1.0.0.apk) (about 270 KB)
+
+On the phone, open that file and allow install from the browser or file manager. Or from a computer:
+
 ```bash
-adb install -r app/build/outputs/apk/release/app-release.apk
+adb install -r releases/MJ-Pay-1.0.0.apk
 ```
 
 ## First-run setup (important)
