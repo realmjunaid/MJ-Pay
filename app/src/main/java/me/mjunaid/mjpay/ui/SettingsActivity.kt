@@ -2,6 +2,7 @@ package me.mjunaid.mjpay.ui
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -113,6 +114,9 @@ class SettingsActivity : BaseActivity() {
             .setTitle(R.string.about_developer)
             .setMessage(R.string.about_developer_message)
             .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.about_developer_site) { _, _ ->
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://mjcreate.net")))
+            }
             .show()
     }
 
