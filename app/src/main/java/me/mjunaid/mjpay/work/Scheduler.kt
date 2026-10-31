@@ -64,10 +64,10 @@ object Scheduler {
     private const val UPDATE_NOW_WORK_NAME = "app-update-now"
     private const val UPDATE_PREFS = "mjpay_updates"
     private const val KEY_SCHEDULE_REV = "schedule_rev"
-    private const val SCHEDULE_REV = 2
+    private const val SCHEDULE_REV = 3
 
     /**
-     * One update check per day, and only after the user has opened the app.
+     * One update check every 12 hours, and only after the user has opened the app.
      * Do not call this from [android.app.Application.onCreate]: an SMS wake must
      * not touch WorkManager or GitHub. Settings still checks when the user asks.
      */
@@ -78,10 +78,10 @@ object Scheduler {
 
         val request = PeriodicWorkRequest.Builder(
             UpdateWorker::class.java,
-            24,
+            12,
             TimeUnit.HOURS
         )
-            .setInitialDelay(24, TimeUnit.HOURS)
+            .setInitialDelay(12, TimeUnit.HOURS)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
