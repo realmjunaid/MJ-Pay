@@ -12,3 +12,4 @@
 # Keep the WorkManager worker constructor entry point.
 -keep class me.mjunaid.mjpay.work.DeliveryWorker { <init>(...); }
 -keep class me.mjunaid.mjpay.work.HeartbeatWorker { <init>(...); }
+-keep class me.mjunaid.mjpay.work.UpdateWorker { <init>(...); }

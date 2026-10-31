@@ -59,4 +59,32 @@ object Scheduler {
         WorkManager.getInstance(context.applicationContext)
             .enqueueUniquePeriodicWork(HEARTBEAT_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
     }
+
+    const val UPDATE_WORK_NAME = "app-update-check"
+
+    /** Looks for a GitHub release a few times a day. Opening the app also checks. */
+    fun scheduleUpdateCheck(context: Context) {
+        val request = PeriodicWorkRequest.Builder(
+            UpdateWorker::class.java,
+            6,
+            TimeUnit.HOURS
+        )
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+        WorkManager.getInstance(context.applicationContext)
+            .enqueueUniquePeriodicWork(UPDATE_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+        val now = OneTimeWorkRequest.Builder(UpdateWorker::class.java)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .build()
+        WorkManager.getInstance(context.applicationContext)
+            .enqueueUniqueWork("app-update-now", ExistingWorkPolicy.KEEP, now)
+    }
 }

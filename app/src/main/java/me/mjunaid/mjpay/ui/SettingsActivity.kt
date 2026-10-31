@@ -1,5 +1,6 @@
 package me.mjunaid.mjpay.ui
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -14,6 +15,9 @@ import me.mjunaid.mjpay.data.Prefs
 import me.mjunaid.mjpay.net.UploadResult
 import me.mjunaid.mjpay.net.UploadRules
 import me.mjunaid.mjpay.sms.SmsFilter
+import me.mjunaid.mjpay.update.UpdateChecker
+import me.mjunaid.mjpay.update.UpdateInstaller
+import me.mjunaid.mjpay.update.UpdateNotifier
 
 class SettingsActivity : BaseActivity() {
 
@@ -28,6 +32,8 @@ class SettingsActivity : BaseActivity() {
     private lateinit var lockSwitch: Switch
     private lateinit var testResult: TextView
     private lateinit var sendTestButton: Button
+    private lateinit var updateStatus: TextView
+    private lateinit var updateButton: Button
 
     private var replaceSecretMode = false
     private var pendingSave = false
@@ -49,6 +55,8 @@ class SettingsActivity : BaseActivity() {
         lockSwitch = findViewById(R.id.switchLock)
         testResult = findViewById(R.id.testResult)
         sendTestButton = findViewById(R.id.btnSendTest)
+        updateStatus = findViewById(R.id.updateStatus)
+        updateButton = findViewById(R.id.btnUpdate)
 
         urlInput.setText(prefs.webhookUrl)
         deviceIdInput.setText(prefs.deviceId)
@@ -73,6 +81,11 @@ class SettingsActivity : BaseActivity() {
         }
         findViewById<Button>(R.id.btnSave).setOnClickListener { save() }
         sendTestButton.setOnClickListener { sendTest() }
+        updateButton.setOnClickListener { downloadAndInstall() }
+        findViewById<Button>(R.id.btnAboutApp).setOnClickListener { showAboutApp() }
+        findViewById<Button>(R.id.btnAboutDeveloper).setOnClickListener { showAboutDeveloper() }
+        updateStatus.text = getString(R.string.update_current, BuildConfig.VERSION_NAME)
+        checkForUpdate()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -82,6 +95,83 @@ class SettingsActivity : BaseActivity() {
             pendingSave = false
             if (resultCode == RESULT_OK && shouldSave) performSave()
         }
+    }
+
+    private var updateInFlight = false
+    private var pendingApkUrl: String? = null
+
+    private fun showAboutApp() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.about_app)
+            .setMessage(getString(R.string.about_app_message, BuildConfig.VERSION_NAME))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun showAboutDeveloper() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.about_developer)
+            .setMessage(R.string.about_developer_message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun checkForUpdate() {
+        val appContext = applicationContext
+        Thread {
+            val newer = try {
+                UpdateChecker.findNewer(BuildConfig.VERSION_NAME)
+            } catch (e: Exception) {
+                null
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (newer == null) {
+                    pendingApkUrl = null
+                    updateStatus.text = getString(R.string.update_current, BuildConfig.VERSION_NAME)
+                } else {
+                    pendingApkUrl = newer.apkUrl
+                    UpdateNotifier.rememberAvailable(appContext, newer.version)
+                    updateStatus.text = getString(R.string.update_ready, newer.version)
+                }
+            }
+        }.start()
+    }
+
+    private fun downloadAndInstall() {
+        if (updateInFlight) return
+        val knownUrl = pendingApkUrl
+        if (!UpdateInstaller.canInstall(this)) {
+            Toast.makeText(this, R.string.update_permission, Toast.LENGTH_LONG).show()
+            UpdateInstaller.openInstallPermission(this)
+            return
+        }
+        updateInFlight = true
+        updateButton.isEnabled = false
+        updateStatus.text = getString(R.string.update_downloading)
+        val appContext = applicationContext
+        Thread {
+            val result = try {
+                val url = knownUrl ?: UpdateChecker.findNewer(BuildConfig.VERSION_NAME)?.apkUrl
+                if (url == null) "current" else {
+                    val file = UpdateInstaller.download(appContext, url)
+                    UpdateInstaller.install(appContext, file)
+                    "installed"
+                }
+            } catch (e: Exception) {
+                "failed"
+            }
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                updateInFlight = false
+                updateButton.isEnabled = true
+                updateStatus.text = when (result) {
+                    "current" -> getString(R.string.update_current, BuildConfig.VERSION_NAME)
+                    "installed" -> getString(R.string.update_downloading)
+                    else -> getString(R.string.update_failed)
+                }
+            }
+        }.start()
     }
 
     private fun save() {
