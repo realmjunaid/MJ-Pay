@@ -3,8 +3,15 @@
 "$schema" = "./node_modules/wrangler/config-schema.json"
 name = "mj-pay"
 main = "src/index.js"
-compatibility_date = "2026-11-01"
+compatibility_date = "2026-10-31"
+keep_vars = true
+workers_dev = true
 upload_source_maps = true
+
+[[routes]]
+pattern = "pay.mjcreate.net"
+zone_name = "mjcreate.net"
+custom_domain = true
 
 [observability]
 enabled = true
