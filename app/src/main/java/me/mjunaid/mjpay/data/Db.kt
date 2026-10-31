@@ -152,6 +152,34 @@ class Db private constructor(context: Context) :
     fun listFailedIds(limit: Int = MAX_PAGE): List<Long> =
         listIds("$COL_STATUS = ?", arrayOf(STATUS_FAILED), limit)
 
+    /**
+     * Same filtering as [list] but for CSV export: a larger page, still bounded so the
+     * export never builds an unbounded file on a low-memory phone.
+     */
+    fun listForExport(
+        status: String? = null,
+        method: String? = null,
+        trxQuery: String? = null,
+        limit: Int = MAX_EXPORT
+    ): List<Delivery> {
+        val (where, args) = DbLogic.buildFilter(status, method, trxQuery)
+        val safeLimit = limit.coerceIn(1, MAX_EXPORT)
+        val rows = ArrayList<Delivery>(safeLimit)
+        readableDatabase.query(
+            TABLE,
+            LIST_COLUMNS,
+            where,
+            args,
+            null,
+            null,
+            "$COL_RECEIVED_AT DESC, $COL_ID DESC",
+            safeLimit.toString()
+        ).use { cursor ->
+            while (cursor.moveToNext()) rows.add(readRow(cursor))
+        }
+        return rows
+    }
+
     /** ids of PENDING rows received before [olderThanMillis]. */
     fun listPendingIds(olderThanMillis: Long = Long.MAX_VALUE): List<Long> =
         listIds(
@@ -274,6 +302,7 @@ class Db private constructor(context: Context) :
 
         const val TABLE = "deliveries"
         const val MAX_PAGE = 300
+        const val MAX_EXPORT = 5000
 
         private const val COL_ID = "id"
         private const val COL_DELIVERY_ID = "delivery_id"

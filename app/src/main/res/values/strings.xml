@@ -74,6 +74,7 @@
     <string name="secret_is_set">Secret is set.</string>
     <string name="secret_not_set">Secret is not set.</string>
     <string name="replace_secret">Replace secret</string>
+    <string name="new_secret">New secret</string>
     <string name="device_id">Device id</string>
     <string name="sender_allowlist">Sender allowlist (comma separated)</string>
     <string name="retention_days">Keep history for (days)</string>
@@ -110,6 +111,35 @@
     <string name="back">Back</string>
     <string name="amount_prefix">Tk</string>
     <string name="send_test_result">Result</string>
+    <string name="history_today">Today: %1$d payments \u00b7 %2$s</string>
+    <string name="export_share_title">Share MJ Pay CSV</string>
+    <string name="detail_amount">Amount</string>
+    <string name="detail_trx">Trx id</string>
+
+    <string-array name="status_filter">
+        <item>@string/filter_all</item>
+        <item>@string/filter_pending</item>
+        <item>@string/filter_sent</item>
+        <item>@string/filter_failed</item>
+    </string-array>
+
+    <string-array name="method_filter">
+        <item>@string/filter_all</item>
+        <item>bKash</item>
+        <item>Nagad</item>
+    </string-array>
+
+    <!-- Error codes -->
+    <string name="error_config">not configured</string>
+    <string name="error_network">no network</string>
+    <string name="error_timeout">timeout</string>
+    <string name="error_tls">TLS error</string>
+    <string name="error_auth">401/403: check the secret and the phone clock</string>
+    <string name="error_io">I/O error</string>
+    <string name="error_body">message body unavailable</string>
+    <string name="error_expired">expired after 24 hours</string>
+    <string name="error_http">server returned %1$s</string>
+
     <string name="simulate_title">Simulate SMS (debug)</string>
     <string name="simulate_sender">Sender</string>
     <string name="simulate_body">Message body</string>
