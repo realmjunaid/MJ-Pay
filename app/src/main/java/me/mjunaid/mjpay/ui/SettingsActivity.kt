@@ -1,7 +1,5 @@
 package me.mjunaid.mjpay.ui
 
-import android.app.KeyguardManager
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -182,10 +180,7 @@ class SettingsActivity : BaseActivity() {
         }
     }
 
-    private fun hasDeviceCredential(): Boolean {
-        val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
-        return keyguard?.isDeviceSecure == true
-    }
+    private fun hasDeviceCredential(): Boolean = LockManager.hasDeviceCredential(this)
 
     private companion object {
         const val REQ_SAVE = 3001

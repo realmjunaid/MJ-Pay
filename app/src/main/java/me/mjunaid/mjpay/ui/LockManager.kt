@@ -54,6 +54,11 @@ object LockManager {
 
     fun isEnabled(context: Context): Boolean = Prefs(context).lockEnabled
 
+    fun hasDeviceCredential(context: Context): Boolean {
+        val keyguard = context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+        return keyguard?.isDeviceSecure == true
+    }
+
     fun isSessionUnlocked(context: Context): Boolean =
         !isEnabled(context) || sessionUnlocked
 
@@ -117,6 +122,7 @@ object LockManager {
 
     private fun launchCredentialPrompt(activity: Activity, requestCode: Int) {
         val keyguard = activity.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+        @Suppress("DEPRECATION")
         val intent = keyguard?.createConfirmDeviceCredentialIntent(
             activity.getString(R.string.unlock_title),
             null

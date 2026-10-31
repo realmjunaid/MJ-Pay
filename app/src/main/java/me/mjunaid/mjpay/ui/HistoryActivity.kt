@@ -178,7 +178,13 @@ class HistoryActivity : BaseActivity() {
             .setTitle(R.string.export_title)
             .setMessage(R.string.export_message)
             .setPositiveButton(R.string.export_continue) { _, _ ->
-                LockManager.authenticate(this, REQ_EXPORT)
+                // Devices without a secure screen lock cannot show the credential prompt;
+                // the warning above is the only gate there.
+                if (LockManager.hasDeviceCredential(this)) {
+                    LockManager.authenticate(this, REQ_EXPORT)
+                } else {
+                    exportCsv()
+                }
             }
             .setNegativeButton(R.string.export_cancel, null)
             .show()

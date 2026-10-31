@@ -54,6 +54,23 @@ class MainActivity : BaseActivity() {
         }
         sendTestButton.setOnClickListener { sendTest() }
 
+        if (BuildConfig.DEBUG) {
+            // Debug-only shortcut, removed from release by R8: long-press the title.
+            findViewById<TextView>(R.id.title).setOnLongClickListener {
+                try {
+                    startActivity(
+                        Intent(
+                            this,
+                            Class.forName("me.mjunaid.mjpay.debug.SimulateSmsActivity")
+                        )
+                    )
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+            }
+        }
+
         Scheduler.scheduleHeartbeat(this)
     }
 

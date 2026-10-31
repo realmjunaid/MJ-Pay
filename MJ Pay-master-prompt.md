@@ -272,25 +272,25 @@ Indexes on `status`, `received_at`, `trx_id`. Settings (non-secret) in `SharedPr
 
 ## 9. Security checklist (must all pass)
 
-- [ ] Only permissions: `RECEIVE_SMS`, `INTERNET`, `POST_NOTIFICATIONS` (plus those merged by WorkManager). No `READ_SMS`, contacts, storage, location or phone state.
-- [ ] SMS receiver protected with `android:permission="android.permission.BROADCAST_SMS"`; all other components not exported (except the launcher activity).
-- [ ] HTTPS only in release; cleartext disabled; no redirects; the app only talks to the configured host.
-- [ ] Requests signed with HMAC-SHA256 plus timestamp; no static secret header.
-- [ ] Secret stored encrypted with an Android Keystore key; SMS body column encrypted with AES-GCM; neither appears in logs.
-- [ ] `allowBackup=false`, backup/extraction rules exclude all data.
-- [ ] `FLAG_SECURE` on all activities; app lock works; export requires unlock; CSV has no SMS bodies and is injection-safe.
-- [ ] Release build: R8 on, `Log` calls stripped, `debuggable=false`, no third-party SDKs.
-- [ ] Dropped SMS (OTP/PIN/other senders) are never stored, logged or sent.
-- [ ] Optional certificate pinning: document in README how to add a `pin-set` (with a backup pin) to `network_security_config.xml` at build time. Do not implement runtime pinning.
+- [x] Only permissions: `RECEIVE_SMS`, `INTERNET`, `POST_NOTIFICATIONS` (plus those merged by WorkManager). No `READ_SMS`, contacts, storage, location or phone state.
+- [x] SMS receiver protected with `android:permission="android.permission.BROADCAST_SMS"`; all other components not exported (except the launcher activity).
+- [x] HTTPS only in release; cleartext disabled; no redirects; the app only talks to the configured host.
+- [x] Requests signed with HMAC-SHA256 plus timestamp; no static secret header.
+- [x] Secret stored encrypted with an Android Keystore key; SMS body column encrypted with AES-GCM; neither appears in logs.
+- [x] `allowBackup=false`, backup/extraction rules exclude all data.
+- [x] `FLAG_SECURE` on all activities; app lock works; export requires unlock; CSV has no SMS bodies and is injection-safe.
+- [x] Release build: R8 on, `Log` calls stripped, `debuggable=false`, no third-party SDKs.
+- [x] Dropped SMS (OTP/PIN/other senders) are never stored, logged or sent.
+- [x] Optional certificate pinning: document in README how to add a `pin-set` (with a backup pin) to `network_security_config.xml` at build time. Do not implement runtime pinning.
 
 ## 10. Performance checklist (must all pass)
 
-- [ ] No foreground service, wake locks, `AlarmManager` exact alarms, polling loops or long-lived threads.
-- [ ] Receiver uses `goAsync()` with a hard 8-second stop and always calls `finish()`.
-- [ ] Heartbeat is one 15-minute periodic work with a tiny JSON body; no other recurring work.
-- [ ] No observers or listeners active while the UI is closed.
-- [ ] Release APK under ~1.5 MB; no unused resources or libraries.
-- [ ] History screen never loads more than the visible page of rows.
+- [x] No foreground service, wake locks, `AlarmManager` exact alarms, polling loops or long-lived threads.
+- [x] Receiver uses `goAsync()` with a hard 8-second stop and always calls `finish()`.
+- [x] Heartbeat is one 15-minute periodic work with a tiny JSON body; no other recurring work.
+- [x] No observers or listeners active while the UI is closed.
+- [x] Release APK under ~1.5 MB; no unused resources or libraries.
+- [x] History screen never loads more than the visible page of rows.
 
 ## 11. Testing
 
