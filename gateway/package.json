@@ -1,0 +1,21 @@
+{
+  "name": "mj-pay-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MJ Pay Gateway: signed SMS webhook and payment match API on Cloudflare Workers.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.118.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

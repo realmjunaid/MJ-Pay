@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+SMS_WEBHOOK_SECRET=replace-with-the-same-secret-as-the-phone
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=replace-with-service-role-key
