@@ -72,6 +72,7 @@ class MainActivity : BaseActivity() {
         }
 
         Scheduler.scheduleHeartbeat(this)
+        Scheduler.ensureUpdateCheck(this)
     }
 
     override fun onResume() {

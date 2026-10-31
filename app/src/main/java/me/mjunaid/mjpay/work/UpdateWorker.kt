@@ -22,7 +22,8 @@ class UpdateWorker(
             }
             Result.success()
         } catch (e: Exception) {
-            Result.retry()
+            // A failed check waits for the next day. Retrying would wake the phone again.
+            Result.success()
         }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
 import android.provider.Telephony
 import me.mjunaid.mjpay.sms.ImmediateDelivery
 import me.mjunaid.mjpay.sms.SmsIntake
@@ -39,24 +40,30 @@ class SmsReceiver : BroadcastReceiver() {
 
         val pendingResult = goAsync()
         val finished = AtomicBoolean(false)
+        val handler = Handler(Looper.getMainLooper())
+        val hardStop = Runnable {
+            if (finished.compareAndSet(false, true)) {
+                Scheduler.enqueueDelivery(appContext, stored.deliveryId)
+                pendingResult.finish()
+            }
+        }
 
-        // Immediate attempt on a short-lived thread, hard-stopped after ~8 seconds.
+        // Immediate attempt on a short-lived background thread. The hard stop is
+        // cancelled as soon as the attempt returns, so a fast upload does not keep
+        // the process awake for the full timeout.
         Thread {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND)
             try {
                 ImmediateDelivery.attempt(stored, appContext)
             } catch (e: Exception) {
                 Scheduler.enqueueDelivery(appContext, stored.deliveryId)
             } finally {
+                handler.removeCallbacks(hardStop)
                 if (finished.compareAndSet(false, true)) pendingResult.finish()
             }
         }.start()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (finished.compareAndSet(false, true)) {
-                Scheduler.enqueueDelivery(appContext, stored.deliveryId)
-                pendingResult.finish()
-            }
-        }, HARD_STOP_MS)
+        handler.postDelayed(hardStop, HARD_STOP_MS)
     }
 
     private companion object {

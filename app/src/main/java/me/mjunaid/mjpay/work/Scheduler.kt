@@ -61,30 +61,42 @@ object Scheduler {
     }
 
     const val UPDATE_WORK_NAME = "app-update-check"
+    private const val UPDATE_NOW_WORK_NAME = "app-update-now"
+    private const val UPDATE_PREFS = "mjpay_updates"
+    private const val KEY_SCHEDULE_REV = "schedule_rev"
+    private const val SCHEDULE_REV = 2
 
-    /** Looks for a GitHub release a few times a day. Opening the app also checks. */
-    fun scheduleUpdateCheck(context: Context) {
+    /**
+     * One update check per day, and only after the user has opened the app.
+     * Do not call this from [android.app.Application.onCreate]: an SMS wake must
+     * not touch WorkManager or GitHub. Settings still checks when the user asks.
+     */
+    fun ensureUpdateCheck(context: Context) {
+        val appContext = context.applicationContext
+        val prefs = appContext.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+        if (prefs.getInt(KEY_SCHEDULE_REV, 0) >= SCHEDULE_REV) return
+
         val request = PeriodicWorkRequest.Builder(
             UpdateWorker::class.java,
-            6,
+            24,
             TimeUnit.HOURS
         )
+            .setInitialDelay(24, TimeUnit.HOURS)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(true)
                     .build()
             )
             .build()
-        WorkManager.getInstance(context.applicationContext)
-            .enqueueUniquePeriodicWork(UPDATE_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
-        val now = OneTimeWorkRequest.Builder(UpdateWorker::class.java)
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .build()
-        WorkManager.getInstance(context.applicationContext)
-            .enqueueUniqueWork("app-update-now", ExistingWorkPolicy.KEEP, now)
+
+        val workManager = WorkManager.getInstance(appContext)
+        workManager.enqueueUniquePeriodicWork(
+            UPDATE_WORK_NAME,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+            request
+        )
+        workManager.cancelUniqueWork(UPDATE_NOW_WORK_NAME)
+        prefs.edit().putInt(KEY_SCHEDULE_REV, SCHEDULE_REV).apply()
     }
 }
