@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MJ Pay</string>
+
+    <!-- Main screen -->
+    <string name="main_subtitle">Payment SMS forwarder</string>
+    <string name="status_title">Status</string>
+    <string name="today_title">Today</string>
+    <string name="sms_permission">SMS permission</string>
+    <string name="battery_optimization">Battery optimization</string>
+    <string name="notification_permission">Notifications</string>
+    <string name="last_success">Last successful send</string>
+    <string name="last_heartbeat">Last heartbeat</string>
+    <string name="pending_count">Pending deliveries</string>
+    <string name="today_payments">Payments</string>
+    <string name="today_total">Total received</string>
+    <string name="grant">Grant</string>
+    <string name="open_settings">Open settings</string>
+    <string name="allowed">Allowed</string>
+    <string name="not_allowed">Not allowed</string>
+    <string name="unrestricted">Unrestricted</string>
+    <string name="restricted">Restricted</string>
+    <string name="never">Never</string>
+    <string name="not_scheduled">Not yet</string>
+    <string name="ok">OK</string>
+    <string name="failed">Failed</string>
+    <string name="history">History</string>
+    <string name="settings">Settings</string>
+    <string name="send_test">Send test</string>
+    <string name="sending">Sending\u2026</string>
+    <string name="test_success">Test delivered to the server.</string>
+    <string name="test_failed">Test failed: %1$s</string>
+
+    <!-- Banners -->
+    <string name="banner_sms">SMS permission is missing. The app cannot receive payments.</string>
+    <string name="banner_config">Webhook URL or secret is not set. Open Settings.</string>
+    <string name="banner_heartbeat">Heartbeat has been failing for over 45 minutes.</string>
+    <string name="banner_empty_allowlist">Sender allowlist is empty. Nothing will be forwarded.</string>
+
+    <!-- History -->
+    <string name="filter_status">Status</string>
+    <string name="filter_method">Method</string>
+    <string name="filter_all">All</string>
+    <string name="filter_pending">Pending</string>
+    <string name="filter_sent">Sent</string>
+    <string name="filter_failed">Failed</string>
+    <string name="search_trx">Search trx id</string>
+    <string name="resend_all_failed">Resend all failed</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="load_more">Load more</string>
+    <string name="row_limit_reached">Showing the newest 300 records.</string>
+    <string name="no_records">No deliveries yet.</string>
+    <string name="resend_queued">%1$d failed deliveries re-queued.</string>
+    <string name="resend_none">No failed deliveries.</string>
+
+    <!-- Detail -->
+    <string name="detail_title">Delivery</string>
+    <string name="detail_body">Message</string>
+    <string name="detail_sender">Sender</string>
+    <string name="detail_received">Received</string>
+    <string name="detail_attempts">Attempts</string>
+    <string name="detail_last_error">Last error</string>
+    <string name="detail_last_attempt">Last attempt</string>
+    <string name="detail_sim">SIM slot</string>
+    <string name="detail_status">Status</string>
+    <string name="resend">Resend</string>
+    <string name="resend_done">Delivery re-queued.</string>
+    <string name="body_unavailable">Message body unavailable.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="webhook_url">Webhook URL (https)</string>
+    <string name="secret">Shared secret</string>
+    <string name="secret_is_set">Secret is set.</string>
+    <string name="secret_not_set">Secret is not set.</string>
+    <string name="replace_secret">Replace secret</string>
+    <string name="device_id">Device id</string>
+    <string name="sender_allowlist">Sender allowlist (comma separated)</string>
+    <string name="retention_days">Keep history for (days)</string>
+    <string name="app_lock">App lock</string>
+    <string name="app_lock_hint">Requires a device screen lock. SMS delivery keeps working while locked.</string>
+    <string name="save">Save</string>
+    <string name="saved">Settings saved.</string>
+    <string name="save_failed">Could not save settings.</string>
+    <string name="invalid_url">Webhook URL must start with https://</string>
+    <string name="invalid_secret">Enter a secret.</string>
+    <string name="invalid_retention">Retention must be between 1 and 365 days.</string>
+    <string name="invalid_allowlist">Enter at least one sender.</string>
+    <string name="lock_unavailable">Set a device screen lock (PIN, pattern or password) first.</string>
+    <string name="secret_replaced">Enter a new secret, then save.</string>
+
+    <!-- Lock -->
+    <string name="unlock_title">Unlock MJ Pay</string>
+    <string name="unlock_cancelled">Authentication is required.</string>
+
+    <!-- Export -->
+    <string name="export_title">Export payment data?</string>
+    <string name="export_message">The CSV contains payment records (no SMS text). Keep it private.</string>
+    <string name="export_continue">Continue</string>
+    <string name="export_cancel">Cancel</string>
+    <string name="export_failed">Export failed.</string>
+    <string name="export_ready">Choose where to send the CSV.</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_name">Delivery alerts</string>
+    <string name="notif_title">MJ Pay: %1$d deliveries are failing</string>
+    <string name="notif_text">Open MJ Pay to check the history.</string>
+
+    <!-- Misc -->
+    <string name="back">Back</string>
+    <string name="amount_prefix">Tk</string>
+    <string name="send_test_result">Result</string>
+    <string name="simulate_title">Simulate SMS (debug)</string>
+    <string name="simulate_sender">Sender</string>
+    <string name="simulate_body">Message body</string>
+    <string name="simulate_run">Run pipeline</string>
+    <string name="simulate_result">Result: %1$s</string>
+</resources>
