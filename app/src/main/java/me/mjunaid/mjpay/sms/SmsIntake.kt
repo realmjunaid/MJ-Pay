@@ -36,11 +36,9 @@ object SmsIntake {
         sim: Int?
     ): Result {
         val prefs = Prefs(context)
-        when (SmsFilter.evaluate(sender, body, prefs.allowlist())) {
-            is SmsFilter.Result.Drop -> return Result.Dropped(
-                (SmsFilter.evaluate(sender, body, prefs.allowlist()) as SmsFilter.Result.Drop).reason
-            )
-            SmsFilter.Result.Accept -> Unit
+        val filterResult = SmsFilter.evaluate(sender, body, prefs.allowlist())
+        if (filterResult is SmsFilter.Result.Drop) {
+            return Result.Dropped(filterResult.reason)
         }
 
         val parsed = SmsParserLite.parse(sender, body)
