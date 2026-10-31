@@ -85,7 +85,6 @@ class SettingsActivity : BaseActivity() {
         updateButton.setOnClickListener { downloadAndInstall() }
         findViewById<Button>(R.id.btnAboutApp).setOnClickListener { showAboutApp() }
         findViewById<Button>(R.id.btnAboutDeveloper).setOnClickListener { showAboutDeveloper() }
-        updateStatus.text = getString(R.string.update_current, BuildConfig.VERSION_NAME)
         checkForUpdate()
     }
 
@@ -122,21 +121,25 @@ class SettingsActivity : BaseActivity() {
 
     private fun checkForUpdate() {
         val appContext = applicationContext
+        updateStatus.text = getString(R.string.update_checking)
         Thread {
-            val newer = try {
-                UpdateChecker.findNewer(BuildConfig.VERSION_NAME)
-            } catch (e: Exception) {
-                null
-            }
+            val outcome = UpdateChecker.check(BuildConfig.VERSION_NAME)
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
-                if (newer == null) {
-                    pendingApkUrl = null
-                    updateStatus.text = getString(R.string.update_current, BuildConfig.VERSION_NAME)
-                } else {
-                    pendingApkUrl = newer.apkUrl
-                    UpdateNotifier.rememberAvailable(appContext, newer.version)
-                    updateStatus.text = getString(R.string.update_ready, newer.version)
+                when (outcome) {
+                    is UpdateChecker.Outcome.Update -> {
+                        pendingApkUrl = outcome.release.apkUrl
+                        UpdateNotifier.rememberAvailable(appContext, outcome.release.version)
+                        updateStatus.text = getString(R.string.update_ready, outcome.release.version)
+                    }
+                    UpdateChecker.Outcome.Current -> {
+                        pendingApkUrl = null
+                        updateStatus.text = getString(R.string.update_current, BuildConfig.VERSION_NAME)
+                    }
+                    UpdateChecker.Outcome.Failed -> {
+                        pendingApkUrl = null
+                        updateStatus.text = getString(R.string.update_check_failed)
+                    }
                 }
             }
         }.start()
@@ -156,11 +159,19 @@ class SettingsActivity : BaseActivity() {
         val appContext = applicationContext
         Thread {
             val result = try {
-                val url = knownUrl ?: UpdateChecker.findNewer(BuildConfig.VERSION_NAME)?.apkUrl
-                if (url == null) "current" else {
-                    val file = UpdateInstaller.download(appContext, url)
-                    UpdateInstaller.install(appContext, file)
-                    "installed"
+                val url = knownUrl ?: when (val outcome = UpdateChecker.check(BuildConfig.VERSION_NAME)) {
+                    is UpdateChecker.Outcome.Update -> outcome.release.apkUrl
+                    UpdateChecker.Outcome.Current -> ""
+                    UpdateChecker.Outcome.Failed -> null
+                }
+                when {
+                    url == null -> "failed"
+                    url.isEmpty() -> "current"
+                    else -> {
+                        val file = UpdateInstaller.download(appContext, url)
+                        UpdateInstaller.install(appContext, file)
+                        "installed"
+                    }
                 }
             } catch (e: Exception) {
                 "failed"

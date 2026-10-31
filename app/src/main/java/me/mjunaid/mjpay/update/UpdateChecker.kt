@@ -14,9 +14,30 @@ object UpdateChecker {
 
     data class Release(val version: String, val apkUrl: String)
 
-    fun findNewer(currentVersion: String): Release? {
-        val release = fetchLatest() ?: return null
-        return if (VersionCompare.isNewer(release.version, currentVersion)) release else null
+    sealed class Outcome {
+        data class Update(val release: Release) : Outcome()
+        object Current : Outcome()
+        object Failed : Outcome()
+    }
+
+    fun findNewer(currentVersion: String): Release? =
+        when (val outcome = check(currentVersion)) {
+            is Outcome.Update -> outcome.release
+            else -> null
+        }
+
+    /** A failed lookup is not the same as already being on the latest release. */
+    fun check(currentVersion: String): Outcome {
+        val release = try {
+            fetchLatest()
+        } catch (e: Exception) {
+            return Outcome.Failed
+        } ?: return Outcome.Failed
+        return if (VersionCompare.isNewer(release.version, currentVersion)) {
+            Outcome.Update(release)
+        } else {
+            Outcome.Current
+        }
     }
 
     fun fetchLatest(): Release? {
