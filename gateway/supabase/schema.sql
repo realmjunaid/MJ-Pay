@@ -87,6 +87,7 @@ as $$
 declare
   existing public.sms_payments%rowtype;
   target public.sms_payments%rowtype;
+  mismatch_amount numeric;
 begin
   if p_order_ref is null or length(btrim(p_order_ref)) = 0 or length(p_order_ref) > 128 then
     return jsonb_build_object('status', 'invalid', 'error', 'order_ref required');
@@ -127,6 +128,18 @@ begin
   limit 1;
 
   if not found then
+    select amount into mismatch_amount
+    from public.sms_payments
+    where claimed_at is null
+      and sender_number = p_sender_number
+      and received_at >= p_since
+      and received_at <= p_until
+      and amount is distinct from p_amount
+    order by received_at
+    limit 1;
+    if found then
+      return jsonb_build_object('status', 'amount_mismatch', 'amount', mismatch_amount);
+    end if;
     return jsonb_build_object('status', 'not_found');
   end if;
 
