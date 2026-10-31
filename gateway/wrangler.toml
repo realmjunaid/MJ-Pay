@@ -1,7 +1,7 @@
 # Cloudflare Workers config. Secrets are NOT stored here.
 # Set them with `wrangler secret put` or in the Workers Builds dashboard.
 "$schema" = "./node_modules/wrangler/config-schema.json"
-name = "mj-pay-gateway"
+name = "mj-pay"
 main = "src/index.js"
 compatibility_date = "2026-11-01"
 upload_source_maps = true
@@ -15,7 +15,3 @@ head_sampling_rate = 1
 
 [observability.traces]
 enabled = true
-
-# Names only. Values stay out of git.
-[secrets]
-required = ["SMS_WEBHOOK_SECRET", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]

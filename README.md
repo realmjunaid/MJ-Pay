@@ -13,7 +13,7 @@ and keeps a small local history.
 2. একটি লম্বা র্যান্ডম কী বানিয়ে তার SHA-256 হ্যাশ `projects` টেবিলে ঢুকান। কাঁচা কী শুধু বটে রাখুন।
 3. Cloudflare → Workers → এই GitHub রিপো ইমপোর্ট করুন। **Root directory = `gateway`**। Deploy command: `npx wrangler deploy`।
 4. এই তিনটি সিক্রেট দিন: `SMS_WEBHOOK_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`।
-5. ফোনের Settings-এ URL দিন: `https://<worker-host>/sms-webhook` এবং সেই একই সিক্রেট।
+5. ফোনের Settings-এ URL দিন: `https://mj-pay.<আপনার-সাবডোমেইন>.workers.dev/sms-webhook` এবং সেই একই সিক্রেট।
 6. বট থেকে `POST /v1/match` করুন, হেডার `X-Project-Key`।
 
 `service_role` কী আর প্রজেক্ট কী কখনো ফোন বা ওয়েবসাইটের ফ্রন্টএন্ডে দেবেন না।

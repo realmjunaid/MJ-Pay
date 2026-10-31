@@ -69,9 +69,9 @@ npx wrangler deploy
 
 ---
 
-## ধাপ ৪ — তিনটি সিক্রেট দিন
+## ধাপ ৪ — ডিপ্লয় সফল হওয়ার পর তিনটি সিক্রেট দিন
 
-Cloudflare → আপনার Worker → **Settings** → **Variables and Secrets** → **Add** → Encrypt।
+প্রথম ডিপ্লয় সিক্রেট ছাড়াই উঠবে। তারপর Cloudflare → **mj-pay** → **Settings** → **Variables and Secrets** → **Add** → **Encrypt** চেক করে এই তিনটি দিন। সেভ করলে Worker আবার ডিপ্লয় হবে।
 
 অথবা পাওয়ারশেল:
 
@@ -98,7 +98,7 @@ npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 
 অ্যাপ → Settings:
 
-1. **Webhook URL:** `https://mj-pay-gateway.<আপনার-সাবডোমেইন>.workers.dev/sms-webhook`  
+1. **Webhook URL:** `https://mj-pay.<আপনার-সাবডোমেইন>.workers.dev/sms-webhook`  
    শেষে `/sms-webhook` থাকতেই হবে। `https` ছাড়া রিলিজ অ্যাপ পাঠাবে না।
 2. **Shared secret:** ধাপ ৪-এর `SMS_WEBHOOK_SECRET`।
 3. **Send test** চাপুন। সফল হলে Supabase-এ কিছু লেখা হবে না; এটা শুধু সিগনেচার চেক।
