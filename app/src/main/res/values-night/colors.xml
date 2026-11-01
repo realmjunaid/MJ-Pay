@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#101214</color>
-    <color name="surface">#1B1E21</color>
-    <color name="surface_alt">#24282C</color>
-    <color name="text_primary">#ECEDEE</color>
-    <color name="text_secondary">#A2A9B2</color>
-    <color name="accent">#4FD1C5</color>
-    <color name="accent_text">#05201D</color>
-    <color name="divider">#2C3136</color>
-    <color name="error">#F2B8B5</color>
-    <color name="error_bg">#3A1B1A</color>
-    <color name="status_sent">#6EE7A8</color>
-    <color name="status_pending">#F5C542</color>
-    <color name="status_failed">#F2B8B5</color>
+    <color name="bg">#000000</color>
+    <color name="surface">#111111</color>
+    <color name="surface_alt">#1A1A1A</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#A3A3A3</color>
+    <color name="accent">#FFFFFF</color>
+    <color name="accent_text">#000000</color>
+    <color name="divider">#2A2A2A</color>
+    <color name="error">#FFFFFF</color>
+    <color name="error_bg">#1A1A1A</color>
+    <color name="status_sent">#FFFFFF</color>
+    <color name="status_pending">#A3A3A3</color>
+    <color name="status_failed">#FFFFFF</color>
 </resources>
