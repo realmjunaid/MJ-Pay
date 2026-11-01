@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseAmountPaisa, parseAmountToCanonical, parseSms, parseTime, normalizeSenderNumber } from "../src/parser.js";
+import {
+  parseAmountPaisa,
+  parseAmountToCanonical,
+  parseSms,
+  parseTime,
+  normalizeSenderNumber,
+  normalizeTrxId,
+  parseTrxId,
+} from "../src/parser.js";
 import { hmacSha256Hex, verifySignedRequest } from "../src/verify.js";
 
 test("parses a bKash received SMS the same way the phone does", () => {
@@ -19,6 +27,16 @@ test("normalizes +880 numbers and rejects non-mobiles", () => {
   assert.equal(normalizeSenderNumber("+8801712345678"), "01712345678");
   assert.equal(normalizeSenderNumber("8801812345678"), "01812345678");
   assert.equal(normalizeSenderNumber("12345"), null);
+});
+
+test("transaction IDs match upper-case without spaces", () => {
+  assert.equal(parseTrxId("You have received Tk 100 from 01700000000. TrxID 8n7a2k9q1."), "8n7a2k9q1");
+  assert.equal(normalizeTrxId(" 8n7a2k9q1 "), "8N7A2K9Q1");
+  assert.equal(normalizeTrxId("TXN 1234"), "TXN1234");
+  assert.equal(normalizeTrxId("abc"), null);
+  assert.equal(normalizeTrxId("bad-id!"), null);
+  assert.equal(normalizeTrxId("x".repeat(65)), null);
+  assert.equal(normalizeTrxId(null), null);
 });
 
 test("amount match input is canonical to the paisa", () => {

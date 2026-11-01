@@ -5,6 +5,7 @@
 
 const AMOUNT = /(?:^|[^\d])(?:tk|bdt|taka)\.?\s*:?\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)/i;
 const TRX_ID = /\b(?:trx\s*id|trxid|txn\s*id|txnid)\s*:?\s*([A-Za-z0-9]{4,})/i;
+const TRX_TOKEN = /^[A-Z0-9]{4,64}$/;
 const FROM_NUMBER = /\bfrom\s*:?\s*((?:\+?880|88)?0?1[3-9]\d{8})\b/i;
 const ANY_NUMBER = /(?:\+?880|88)?0?1[3-9]\d{8}/g;
 
@@ -56,6 +57,16 @@ export function parseAmountToCanonical(value) {
 export function parseTrxId(body) {
   const match = TRX_ID.exec(String(body || ""));
   return match ? match[1] : null;
+}
+
+/**
+ * Canonical transaction ID for matching: upper-case, no spaces.
+ * A caller-supplied value that fails this is rejected, not guessed.
+ */
+export function normalizeTrxId(value) {
+  if (value == null) return null;
+  const cleaned = String(value).trim().toUpperCase().replace(/\s+/g, "");
+  return TRX_TOKEN.test(cleaned) ? cleaned : null;
 }
 
 export function parseSenderNumber(body) {

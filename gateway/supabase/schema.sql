@@ -54,6 +54,10 @@ create index if not exists sms_payments_unclaimed_match_idx
   on public.sms_payments (sender_number, amount, received_at)
   where claimed_at is null;
 
+create index if not exists sms_payments_unclaimed_trx_idx
+  on public.sms_payments (upper(trx_id), amount, received_at)
+  where claimed_at is null;
+
 create unique index if not exists sms_payments_project_order_uidx
   on public.sms_payments (claimed_project_id, order_ref)
   where order_ref is not null;
@@ -71,6 +75,7 @@ grant select, insert, update, delete on table public.devices to service_role;
 grant select, insert, update, delete on table public.sms_payments to service_role;
 
 -- Atomic claim. Same project + order_ref is idempotent.
+-- Verification is by phone number, by transaction ID, or by both together.
 -- Concurrent claims of one payment are serialized with FOR UPDATE SKIP LOCKED.
 create or replace function public.claim_sms_payment(
   p_project_id uuid,
@@ -78,7 +83,9 @@ create or replace function public.claim_sms_payment(
   p_amount numeric,
   p_since timestamptz,
   p_until timestamptz,
-  p_order_ref text
+  p_order_ref text,
+  p_trx_id text,
+  p_match_by text
 ) returns jsonb
 language plpgsql
 security invoker
@@ -89,6 +96,15 @@ declare
   target public.sms_payments%rowtype;
   mismatch_amount numeric;
 begin
+  if p_match_by is null or p_match_by not in ('phone', 'trx', 'both') then
+    return jsonb_build_object('status', 'invalid', 'error', 'match_by must be phone, trx or both');
+  end if;
+  if p_match_by in ('phone', 'both') and p_sender_number is null then
+    return jsonb_build_object('status', 'invalid', 'error', 'sender_number required');
+  end if;
+  if p_match_by in ('trx', 'both') and p_trx_id is null then
+    return jsonb_build_object('status', 'invalid', 'error', 'trx_id required');
+  end if;
   if p_order_ref is null or length(btrim(p_order_ref)) = 0 or length(p_order_ref) > 128 then
     return jsonb_build_object('status', 'invalid', 'error', 'order_ref required');
   end if;
@@ -119,10 +135,14 @@ begin
   select * into target
   from public.sms_payments
   where claimed_at is null
-    and sender_number = p_sender_number
     and amount = p_amount
     and received_at >= p_since
     and received_at <= p_until
+    and case p_match_by
+          when 'phone' then sender_number = p_sender_number
+          when 'trx' then upper(trx_id) = p_trx_id
+          else sender_number = p_sender_number and upper(trx_id) = p_trx_id
+        end
   order by received_at
   for update skip locked
   limit 1;
@@ -131,10 +151,14 @@ begin
     select amount into mismatch_amount
     from public.sms_payments
     where claimed_at is null
-      and sender_number = p_sender_number
       and received_at >= p_since
       and received_at <= p_until
       and amount is distinct from p_amount
+      and case p_match_by
+            when 'phone' then sender_number = p_sender_number
+            when 'trx' then upper(trx_id) = p_trx_id
+            else sender_number = p_sender_number and upper(trx_id) = p_trx_id
+          end
     order by received_at
     limit 1;
     if found then
@@ -190,6 +214,30 @@ exception
     end if;
     return jsonb_build_object('status', 'not_found');
 end;
+$$;
+
+revoke all on function public.claim_sms_payment(uuid, text, numeric, timestamptz, timestamptz, text, text, text)
+  from public, anon, authenticated;
+grant execute on function public.claim_sms_payment(uuid, text, numeric, timestamptz, timestamptz, text, text, text)
+  to service_role;
+
+-- Older Workers still call the six-argument form. It verifies by phone number,
+-- exactly as before, and can be removed once every caller sends match_by.
+create or replace function public.claim_sms_payment(
+  p_project_id uuid,
+  p_sender_number text,
+  p_amount numeric,
+  p_since timestamptz,
+  p_until timestamptz,
+  p_order_ref text
+) returns jsonb
+language sql
+security invoker
+set search_path = public
+as $$
+  select public.claim_sms_payment(
+    p_project_id, p_sender_number, p_amount, p_since, p_until, p_order_ref, null, 'phone'
+  );
 $$;
 
 revoke all on function public.claim_sms_payment(uuid, text, numeric, timestamptz, timestamptz, text)

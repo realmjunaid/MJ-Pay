@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { parseSms, parseTime, parseAmountToCanonical, normalizeSenderNumber } from "./parser.js";
+import { parseSms, parseTime, parseAmountToCanonical, normalizeSenderNumber, normalizeTrxId } from "./parser.js";
 import { readRawBody, sha256Hex, verifySignedRequest } from "./verify.js";
 
 const JSON_HEADERS = { "content-type": "application/json; charset=utf-8" };
@@ -160,13 +160,24 @@ export async function handleMatch(request, env) {
   }
 
   const senderNumber = normalizeSenderNumber(body?.sender_number);
+  const trxId = normalizeTrxId(body?.trx_id);
+  const matchBy = resolveMatchBy(body?.match_by, senderNumber, trxId);
   const amount = parseAmountToCanonical(body?.amount);
   const since = parseTime(body?.since);
   const until = parseTime(body?.until);
   const orderRef = typeof body?.order_ref === "string" ? body.order_ref.trim() : "";
 
-  if (!senderNumber || !amount || !since || !until || !orderRef || orderRef.length > 128) {
-    return json({ status: "invalid", error: "sender_number, amount, since, until and order_ref are required" }, 400);
+  if (!matchBy || !amount || !since || !until || !orderRef || orderRef.length > 128) {
+    return json({
+      status: "invalid",
+      error: "amount, since, until, order_ref and a valid match_by are required",
+    }, 400);
+  }
+  if ((matchBy === "phone" || matchBy === "both") && !senderNumber) {
+    return json({ status: "invalid", error: `sender_number is required for match_by ${matchBy}` }, 400);
+  }
+  if ((matchBy === "trx" || matchBy === "both") && !trxId) {
+    return json({ status: "invalid", error: `trx_id is required for match_by ${matchBy}` }, 400);
   }
   if (since > until) {
     return json({ status: "invalid", error: "since is after until" }, 400);
@@ -192,6 +203,8 @@ export async function handleMatch(request, env) {
     p_since: since,
     p_until: until,
     p_order_ref: orderRef,
+    p_trx_id: trxId,
+    p_match_by: matchBy,
   });
 
   if (error) {
@@ -200,9 +213,29 @@ export async function handleMatch(request, env) {
   }
 
   const result = data && typeof data === "object" ? data : { status: "not_found" };
-  console.log(JSON.stringify({ event: "match", project: project.id, status: result.status || "unknown" }));
+  console.log(JSON.stringify({
+    event: "match",
+    project: project.id,
+    match_by: matchBy,
+    status: result.status || "unknown",
+  }));
 
   if (result.status === "invalid") return json(result, 400);
-  return json(result);
+  return json({ ...result, match_by: matchBy });
+}
+
+/**
+ * phone = sender number only, trx = transaction ID only, both = the same SMS
+ * must match both. When match_by is omitted it is inferred from what was sent,
+ * so older callers that only send sender_number keep working.
+ */
+function resolveMatchBy(requested, senderNumber, trxId) {
+  const value = typeof requested === "string" ? requested.trim().toLowerCase() : "";
+  if (value) {
+    return value === "phone" || value === "trx" || value === "both" ? value : null;
+  }
+  if (senderNumber && trxId) return "both";
+  if (trxId) return "trx";
+  return "phone";
 }
 
