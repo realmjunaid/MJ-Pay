@@ -140,8 +140,8 @@ begin
     and received_at <= p_until
     and case p_match_by
           when 'phone' then sender_number = p_sender_number
-          when 'trx' then upper(trx_id) = p_trx_id
-          else sender_number = p_sender_number and upper(trx_id) = p_trx_id
+          when 'trx' then upper(trx_id) = upper(p_trx_id)
+          else sender_number = p_sender_number and upper(trx_id) = upper(p_trx_id)
         end
   order by received_at
   for update skip locked
@@ -156,8 +156,8 @@ begin
       and amount is distinct from p_amount
       and case p_match_by
             when 'phone' then sender_number = p_sender_number
-            when 'trx' then upper(trx_id) = p_trx_id
-            else sender_number = p_sender_number and upper(trx_id) = p_trx_id
+            when 'trx' then upper(trx_id) = upper(p_trx_id)
+            else sender_number = p_sender_number and upper(trx_id) = upper(p_trx_id)
           end
     order by received_at
     limit 1;
